@@ -4,11 +4,16 @@ import stringWidth from 'string-width';
 // get chunks to write before and after the main chunk to write before the prompt line
 export function getChunks(
   rl: Interface,
-  stream: NodeJS.WriteStream
+  stream: NodeJS.WritableStream
 ): { before: string; after: string } {
+  // ensure columns exists
+  const { columns } = stream as NodeJS.WriteStream;
+  const cols =
+    typeof columns === 'number' && isFinite(columns) && columns > 0
+      ? columns
+      : 80;
   const lines = Math.ceil(
-    (stringWidth(rl.line) + stringWidth(rl.getPrompt())) /
-      (stream.columns || 80)
+    (stringWidth(rl.line) + stringWidth(rl.getPrompt())) / cols
   );
   return {
     before:

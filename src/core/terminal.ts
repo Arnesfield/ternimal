@@ -7,62 +7,62 @@ import { refreshLine } from '../lib/refresh-line.js';
 
 /**
  * Initialize terminal.
- * @param options The initialize options.
- * @returns The terminal.
+ * @param options The terminal options.
+ * @returns The terminal instance.
  */
 export function init(options: T.Options = {}): T.Terminal {
   return new Terminal(options);
 }
 
 class Terminal implements T.Terminal {
-  readonly #input: NodeJS.ReadStream;
+  #paused = false;
   readonly #output: OutputStream;
+  readonly rl: Interface;
   readonly console: Console;
-  readonly interface: Interface;
 
   constructor(options: T.Options) {
-    const input = (this.#input = options.stdin || process.stdin);
+    const input = options.stdin || process.stdin;
     const output = options.stdout || process.stdout;
     const stderr = options.stderr || process.stderr;
-    this.interface = createInterface({ ...options.readline, input, output });
-    this.#output = new OutputStream(this.interface, output, stderr);
+    this.rl = createInterface({ ...options.readline, input, output })
+      .on('pause', () => (this.#paused = true))
+      .on('resume', () => (this.#paused = false));
+    this.#output = new OutputStream(this.rl, output, stderr);
     this.console = new Console(this.#output.streams);
   }
 
   isPaused() {
-    return this.#input.isPaused();
+    return this.#paused;
   }
 
   pause(options: T.PauseOptions) {
-    if (this.isPaused()) {
-      return false;
+    if (!this.isPaused()) {
+      this.rl.pause();
+      this.#output.pause(options);
     }
-    this.interface.pause();
-    this.#output.pause(options);
-    return true;
+    return this;
   }
 
   resume() {
-    if (!this.isPaused()) {
-      return false;
+    if (this.isPaused()) {
+      this.rl.resume();
+      this.#output.flush();
     }
-    this.#input.resume();
-    this.#output.flush();
-    return true;
+    return this;
   }
 
   setPrompt(prompt: string): this {
-    this.interface.setPrompt(prompt);
+    this.rl.setPrompt(prompt);
     return this.refreshLine();
   }
 
   setLine(line: string): this {
-    (this.interface as RlInterface).line = line;
+    (this.rl as RlInterface).line = line;
     return this.refreshLine();
   }
 
   refreshLine(): this {
-    refreshLine(this.interface);
+    refreshLine(this.rl);
     return this;
   }
 }

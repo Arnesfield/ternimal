@@ -5,15 +5,13 @@ import { getChunks } from './get-chunks.js';
 import { refreshLine } from './refresh-line.js';
 
 interface WriteBuffer {
-  stream: NodeJS.WriteStream;
-  chunk: string | Uint8Array;
+  stream: NodeJS.WritableStream;
+  chunk: any;
   encoding: BufferEncoding;
   callback(error: Error | null | undefined): void;
 }
 
-/**
- * Console output stream to write before the prompt line.
- */
+/** Console output stream to write before the prompt line. */
 export class OutputStream {
   private paused: PauseOptions | null | undefined;
   private readonly writes: WriteBuffer[] = [];
@@ -24,8 +22,8 @@ export class OutputStream {
 
   constructor(
     rl: Interface,
-    stdout: NodeJS.WriteStream,
-    stderr: NodeJS.WriteStream
+    stdout: NodeJS.WritableStream,
+    stderr: NodeJS.WritableStream
   ) {
     this.streams = {
       stdout: this.create(rl, stdout),
@@ -45,7 +43,7 @@ export class OutputStream {
     }
   }
 
-  private create(rl: Interface, stream: NodeJS.WriteStream) {
+  private create(rl: Interface, stream: NodeJS.WritableStream) {
     const writable = new Writable();
     writable._write = (chunk, encoding, callback) => {
       // save to buffer when paused

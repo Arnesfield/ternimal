@@ -12,47 +12,49 @@ export interface PauseOptions {
 
 /** The initialize options. */
 export interface Options {
-  /** The readline options. */
+  /** The options to create the `readline.Interface` instance. */
   readline?: Omit<ReadLineOptions, 'input' | 'output'>;
   /**
    * The `stdin` read stream.
    * @default process.stdin
    */
-  stdin?: NodeJS.ReadStream;
+  stdin?: NodeJS.ReadableStream;
   /**
    * The `stdout` write stream.
    * @default process.stdout
    */
-  stdout?: NodeJS.WriteStream;
+  stdout?: NodeJS.WritableStream;
   /**
    * The `stderr` write stream.
    * @default process.stderr
    */
-  stderr?: NodeJS.WriteStream;
+  stderr?: NodeJS.WritableStream;
 }
 
-/** The terminal. */
+/** The terminal instance. */
 export interface Terminal {
+  /** The `readline.Interface` instance. */
+  readonly rl: Interface;
   /** The console instance. */
   readonly console: Console;
-  /** The `readline.Interface` instance. */
-  readonly interface: Interface;
   /**
    * Check if the read stream is paused.
    * @returns `true` if paused.
    */
   isPaused(): boolean;
   /**
-   * Pause the read (stdin) and write (stdout, stderr) streams.
+   * Pause the read (`stdin`) and write (`stdout`, `stderr`) streams
+   * only when not {@linkcode isPaused paused}.
    * @param options The pause options.
-   * @returns `false` if already paused.
+   * @returns `this` for chaining.
    */
-  pause(options: PauseOptions): boolean;
+  pause(options: PauseOptions): this;
   /**
-   * Resume read (stdin) and write (stdout, stderr) streams.
-   * @returns `false` is not paused.
+   * Resume read (`stdin`) and write (`stdout`, `stderr`) streams
+   * only when {@linkcode isPaused paused}.
+   * @returns `this` for chaining.
    */
-  resume(): boolean;
+  resume(): this;
   /**
    * Set the prompt and call {@linkcode refreshLine}.
    * @param prompt The prompt.
@@ -66,7 +68,7 @@ export interface Terminal {
    */
   setLine(line: string): this;
   /**
-   * Refresh the {@linkcode interface} line.
+   * Refresh the {@linkcode rl} line.
    * @returns `this` for chaining.
    */
   refreshLine(): this;
