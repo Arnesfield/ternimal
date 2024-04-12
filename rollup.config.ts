@@ -4,6 +4,7 @@ import { RollupOptions } from 'rollup';
 import cleanup from 'rollup-plugin-cleanup';
 import dts from 'rollup-plugin-dts';
 import esbuild from 'rollup-plugin-esbuild';
+import externals from 'rollup-plugin-node-externals';
 import outputSize from 'rollup-plugin-output-size';
 import pkg from './package.json' with { type: 'json' };
 
@@ -29,17 +30,18 @@ export default defineConfig([
         comments: ['some', 'sources', /__PURE__/],
         extensions: ['js', 'ts']
       }),
+      externals(),
       outputSize()
     ]
   },
   {
     input,
     output: { file: pkg.types, format: 'esm' },
-    plugins: [dts(), outputSize()]
+    plugins: [dts(), externals(), outputSize()]
   },
   WATCH && {
     input,
     watch: { skipWrite: true },
-    plugins: [eslint(), typescript()]
+    plugins: [eslint(), typescript(), externals()]
   }
 ]);
