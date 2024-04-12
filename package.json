@@ -52,6 +52,9 @@
     "test:watch": "mocha -w",
     "watch": "npm run bundle -- -w --no-watch.clearScreen"
   },
+  "dependencies": {
+    "string-width": "^7.1.0"
+  },
   "devDependencies": {
     "@rollup/plugin-eslint": "^9.0.5",
     "@rollup/plugin-typescript": "^11.1.6",
