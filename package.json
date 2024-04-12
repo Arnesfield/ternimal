@@ -1,4 +1,32 @@
 {
+  "name": "ternimal",
+  "version": "0.0.1-alpha.1",
+  "description": "",
+  "keywords": [
+    "terminal",
+    "line",
+    "console",
+    "output",
+    "cli",
+    "command",
+    "command-line",
+    "prompt",
+    "readline",
+    "input",
+    "stdin",
+    "stdout",
+    "stderr"
+  ],
+  "homepage": "https://github.com/Arnesfield/ternimal#readme",
+  "bugs": {
+    "url": "https://github.com/Arnesfield/ternimal/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Arnesfield/ternimal.git"
+  },
+  "license": "MIT",
+  "author": "Jefferson Rylee <rylee.jeff385@gmail.com>",
   "sideEffects": false,
   "type": "module",
   "exports": {
@@ -23,5 +51,28 @@
     "test": "npm run all -- mocha npm:check",
     "test:watch": "mocha -w",
     "watch": "npm run bundle -- -w --no-watch.clearScreen"
+  },
+  "devDependencies": {
+    "@rollup/plugin-eslint": "^9.0.5",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@types/chai": "^4.3.14",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.12.7",
+    "@typescript-eslint/eslint-plugin": "^7.6.0",
+    "@typescript-eslint/parser": "^7.6.0",
+    "chai": "^5.1.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.57.0",
+    "mocha": "^10.4.0",
+    "prettier": "^3.2.5",
+    "rimraf": "^5.0.5",
+    "rollup": "^4.14.2",
+    "rollup-plugin-cleanup": "^3.2.1",
+    "rollup-plugin-dts": "^6.1.0",
+    "rollup-plugin-esbuild": "^6.1.1",
+    "rollup-plugin-output-size": "^1.4.0",
+    "tslib": "^2.6.2",
+    "tsx": "^4.7.2",
+    "typescript": "^5.4.5"
   }
 }
