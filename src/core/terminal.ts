@@ -24,25 +24,22 @@ class Terminal<
   readonly #output: OutputStream;
   readonly rl: Interface;
   readonly console: Console;
-  readonly stdin: NodeJS.ReadableStream;
-  readonly stdout: NodeJS.WritableStream;
-  readonly stderr: NodeJS.WritableStream;
+  readonly stdout: T.Terminal<Interface>['stdout'];
+  readonly stderr: T.Terminal<Interface>['stderr'];
+  readonly raw: T.Terminal<Interface>['raw'];
 
   constructor(options: T.Options<Interface>) {
-    this.#output = new OutputStream(
-      (this.rl = options.rl),
-      options.stdout || process.stdout,
-      options.stderr || process.stderr
-    );
-    this.stdin = options.stdin;
+    const { rl, stdin, stdout, stderr } = options;
+    this.raw = { stdin, stdout, stderr };
+    this.#output = new OutputStream((this.rl = rl), stdout, stderr);
     this.stdout = this.#output.stdout.stream;
-    this.stderr = this.#output.stderr.stream;
+    this.stderr = this.#output.stderr?.stream || this.stdout;
     this.console = new Console({ stdout: this.stdout, stderr: this.stderr });
   }
 
   paused() {
     return {
-      stdin: this.stdin.isPaused(),
+      stdin: this.raw.stdin.isPaused(),
       stdout: !!(this.#paused && (this.#paused.stdout ?? true)),
       stderr: !!(this.#paused && (this.#paused.stderr ?? true))
     };
@@ -86,7 +83,7 @@ class Terminal<
 
   refreshLine(): this {
     if (!this.paused().stdout) {
-      refreshLine(this.rl);
+      refreshLine(this.rl, this.raw.stdout);
     }
     return this;
   }

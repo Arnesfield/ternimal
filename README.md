@@ -33,23 +33,22 @@ const rl = readline.createInterface({
   output: process.stdout // should match options.stdout
 });
 const term = create({
-  rl, // required
-  stdin: process.stdin, // required
-  stdout: process.stdout, // default
-  stderr: process.stderr // default
+  rl,
+  stdin: process.stdin,
+  stdout: process.stdout,
+  stderr: process.stderr // optional
 });
 
+rl === term.rl; // true
 term.rl.prompt();
 term.rl.on('line', () => {
   term.setPrompt('> ');
 });
 term.console.log('Hello World!');
-term.console.log('equal:', rl === term.rl);
 ```
 
 ```text
 Hello World!
-equal: true
 >
 ```
 
