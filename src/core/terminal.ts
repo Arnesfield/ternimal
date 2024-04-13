@@ -15,41 +15,38 @@ export function init(options: T.Options = {}): T.Terminal {
 }
 
 class Terminal implements T.Terminal {
-  // TODO: handle pause
-  #paused = false;
-  readonly #rl: Interface;
+  #paused: T.PauseOptions | null | undefined;
   readonly #output: OutputStream;
+  readonly rl: Interface;
   readonly console: Console;
+  readonly stdin: NodeJS.ReadableStream;
+  readonly stdout: NodeJS.WritableStream;
+  readonly stderr: NodeJS.WritableStream;
 
   constructor(options: T.Options) {
-    const input = options.stdin || process.stdin;
+    const input = (this.stdin = options.stdin || process.stdin);
     const output = options.stdout || process.stdout;
     const stderr = options.stderr || process.stderr;
-    this.#rl = createInterface({ ...options.readline, input, output })
-      .on('pause', () => (this.#paused = true))
-      .on('resume', () => (this.#paused = false));
-    this.#output = new OutputStream(this.#rl, output, stderr);
+    this.rl = createInterface({ ...options.readline, input, output });
+    this.#output = new OutputStream(this.rl, output, stderr);
+    this.stdout = this.#output.stdout.stream;
+    this.stderr = this.#output.stderr.stream;
     this.console = new Console({ stdout: this.stdout, stderr: this.stderr });
   }
 
-  get rl() {
-    return this.#rl;
+  isPaused(stream: 'stdin' | 'stdout' | 'stderr') {
+    return stream === 'stdin'
+      ? this.stdin.isPaused()
+      : !!(
+          this.#paused &&
+          (stream === 'stdout' || stream === 'stderr') &&
+          (this.#paused[stream] ?? true)
+        );
   }
 
-  get stdout() {
-    return this.#output.stdout.stream;
-  }
-
-  get stderr() {
-    return this.#output.stderr.stream;
-  }
-
-  isPaused() {
-    return this.#paused;
-  }
-
-  pause(options: T.PauseOptions) {
-    if (!this.isPaused()) {
+  pause(options: T.PauseOptions = {}) {
+    if (!this.#paused) {
+      this.#paused = options;
       this.rl.pause();
       this.#output.pause(options);
     }
@@ -57,11 +54,18 @@ class Terminal implements T.Terminal {
   }
 
   resume() {
-    if (this.isPaused()) {
+    if (this.#paused) {
+      this.#paused = null;
       this.rl.resume();
       this.#output.flush();
     }
     return this;
+  }
+
+  close() {
+    // include this redundant method just in case the
+    // close implementation changes in the future (e.g. cleanup)
+    this.rl.close();
   }
 
   setPrompt(prompt: string): this {
@@ -75,7 +79,9 @@ class Terminal implements T.Terminal {
   }
 
   refreshLine(): this {
-    refreshLine(this.rl);
+    if (!this.isPaused('stdout')) {
+      refreshLine(this.rl);
+    }
     return this;
   }
 }

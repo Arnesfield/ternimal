@@ -2,6 +2,7 @@ import { Interface } from 'readline';
 import { Transform } from 'stream';
 import { PauseOptions, PauseStreamOptions } from '../core/core.types.js';
 import { getChunks } from './get-chunks.js';
+import { refreshLine } from './refresh-line.js';
 
 interface WriteBuffer {
   stream: NodeJS.WritableStream;
@@ -56,20 +57,21 @@ function wrap(
   const result: WrappedStream = { stream: transform };
   transform._transform = function (chunk, encoding, callback) {
     // save to buffer when paused
-    if (result.paused) {
-      if (result.paused === true || (result.paused.buffer ?? true)) {
-        writes.push({ stream, chunk, encoding, callback });
-      } else {
-        callback();
-      }
+    if (
+      result.paused &&
+      (result.paused === true || (result.paused.buffer ?? true))
+    ) {
+      writes.push({ stream, chunk, encoding, callback });
       return;
     }
-    // save before and after chunks
-    const chunks = getChunks(rl, stream);
-    chunks && this.push(chunks.before);
-    this.push(chunk, encoding);
-    chunks && this.push(chunks.after);
-    // don't refresh the rl line here, let the consumer decide to do that instead
+    if (!result.paused) {
+      // save before and after chunks
+      const chunks = getChunks(rl, stream);
+      chunks && this.push(chunks.before);
+      this.push(chunk, encoding);
+      chunks && this.push(chunks.after);
+    }
+    refreshLine(rl);
     callback();
   };
   // make sure to pipe to write stream

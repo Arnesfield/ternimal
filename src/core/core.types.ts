@@ -51,15 +51,18 @@ export interface Terminal {
   readonly rl: Interface;
   /** The console instance. */
   readonly console: Console;
+  /** The `stdin` read stream of {@linkcode rl}. */
+  readonly stdin: NodeJS.ReadableStream;
   /** The `stdout` write stream of {@linkcode console}. */
   readonly stdout: NodeJS.WritableStream;
   /** The `stderr` write stream of {@linkcode console}. */
   readonly stderr: NodeJS.WritableStream;
   /**
-   * Check if the read stream is paused.
+   * Check if the stream is paused.
+   * @param stream The stream to check.
    * @returns `true` if paused.
    */
-  isPaused(): boolean;
+  isPaused(stream: 'stdin' | 'stdout' | 'stderr'): boolean;
   /**
    * Pause the read (`stdin`) and write (`stdout`, `stderr`) streams
    * only when not {@linkcode isPaused paused}.
@@ -73,6 +76,8 @@ export interface Terminal {
    * @returns `this` for chaining.
    */
   resume(): this;
+  /** Close the {@linkcode rl} instance. */
+  close(): void;
   /**
    * Set the prompt and call {@linkcode refreshLine}.
    * @param prompt The prompt.
