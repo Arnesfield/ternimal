@@ -10,7 +10,7 @@ export function getChunks(
   const cols = (stream as NodeJS.WriteStream).columns;
   const lines =
     rl.terminal && typeof cols === 'number' && isFinite(cols) && cols > 0
-      ? Math.ceil((stringWidth(rl.line) + stringWidth(rl.getPrompt())) / cols)
+      ? Math.ceil(stringWidth(rl.getPrompt() + rl.line) / cols)
       : 0;
   // make sure to only render these chunks when there is a line prompt
   return lines > 0
