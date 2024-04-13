@@ -6,11 +6,11 @@ import { OutputStream } from '../lib/output-stream.js';
 import { refreshLine } from '../lib/refresh-line.js';
 
 /**
- * Initialize terminal.
+ * Create the terminal instance.
  * @param options The terminal options.
  * @returns The terminal instance.
  */
-export function init(options: T.Options = {}): T.Terminal {
+export function create(options: T.Options = {}): T.Terminal {
   return new Terminal(options);
 }
 
