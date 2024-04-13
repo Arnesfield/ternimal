@@ -1,5 +1,5 @@
 import { Console } from 'console';
-import { Interface, createInterface } from 'readline';
+import readline from 'readline';
 import * as T from '../core/core.types.js';
 import { RlInterface } from '../lib/internal.types.js';
 import { OutputStream } from '../lib/output-stream.js';
@@ -10,11 +10,16 @@ import { refreshLine } from '../lib/refresh-line.js';
  * @param options The terminal options.
  * @returns The terminal instance.
  */
-export function create(options: T.Options = {}): T.Terminal {
+export function create<
+  Interface extends readline.Interface | readline.promises.Interface
+>(options: T.Options<Interface>): T.Terminal<Interface> {
   return new Terminal(options);
 }
 
-class Terminal implements T.Terminal {
+class Terminal<
+  Interface extends readline.Interface | readline.promises.Interface
+> implements T.Terminal<Interface>
+{
   #paused: T.PauseOptions | null | undefined;
   readonly #output: OutputStream;
   readonly rl: Interface;
@@ -23,12 +28,13 @@ class Terminal implements T.Terminal {
   readonly stdout: NodeJS.WritableStream;
   readonly stderr: NodeJS.WritableStream;
 
-  constructor(options: T.Options) {
-    const input = (this.stdin = options.stdin || process.stdin);
-    const output = options.stdout || process.stdout;
-    const stderr = options.stderr || process.stderr;
-    this.rl = createInterface({ ...options.readline, input, output });
-    this.#output = new OutputStream(this.rl, output, stderr);
+  constructor(options: T.Options<Interface>) {
+    this.#output = new OutputStream(
+      (this.rl = options.rl),
+      options.stdout || process.stdout,
+      options.stderr || process.stderr
+    );
+    this.stdin = options.stdin;
     this.stdout = this.#output.stdout.stream;
     this.stderr = this.#output.stderr.stream;
     this.console = new Console({ stdout: this.stdout, stderr: this.stderr });

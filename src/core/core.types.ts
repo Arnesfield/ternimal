@@ -1,4 +1,4 @@
-import { Interface, ReadLineOptions } from 'readline';
+import readline from 'readline';
 
 /** The write stream pause options. */
 export interface PauseStreamOptions {
@@ -40,16 +40,17 @@ export interface Paused {
 }
 
 /** The initialize options. */
-export interface Options {
-  /** The options to create the `readline.Interface` instance. */
-  readline?: Omit<ReadLineOptions, 'input' | 'output'>;
+export interface Options<
+  Interface extends readline.Interface | readline.promises.Interface
+> {
+  /** The readline interface instance. */
+  rl: Interface;
   /**
-   * The `stdin` read stream.
-   * @default process.stdin
+   * The `stdin` read stream. Should match the `input` from the {@linkcode rl} instance.
    */
-  stdin?: NodeJS.ReadableStream;
+  stdin: NodeJS.ReadableStream;
   /**
-   * The `stdout` write stream.
+   * The `stdout` write stream. Should match the `output` from the {@linkcode rl} instance.
    * @default process.stdout
    */
   stdout?: NodeJS.WritableStream;
@@ -61,8 +62,10 @@ export interface Options {
 }
 
 /** The terminal instance. */
-export interface Terminal {
-  /** The `readline.Interface` instance. */
+export interface Terminal<
+  Interface extends readline.Interface | readline.promises.Interface
+> {
+  /** The readline interface instance. */
   readonly rl: Interface;
   /** The console instance. */
   readonly console: Console;
