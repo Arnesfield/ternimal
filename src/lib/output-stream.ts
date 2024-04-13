@@ -1,8 +1,7 @@
 import { Interface } from 'readline';
-import { Writable } from 'stream';
-import { PauseOptions } from '../core/core.types.js';
+import { Transform } from 'stream';
+import { PauseOptions, PauseStreamOptions } from '../core/core.types.js';
 import { getChunks } from './get-chunks.js';
-import { refreshLine } from './refresh-line.js';
 
 interface WriteBuffer {
   stream: NodeJS.WritableStream;
@@ -11,71 +10,69 @@ interface WriteBuffer {
   callback(error: Error | null | undefined): void;
 }
 
+export interface WrappedStream {
+  stream: NodeJS.WritableStream;
+  paused?: boolean | PauseStreamOptions | null;
+}
+
 /** Console output stream to write before the prompt line. */
 export class OutputStream {
-  private paused: PauseOptions | null | undefined;
+  readonly stdout: WrappedStream;
+  readonly stderr: WrappedStream;
+  // maintain one shared array for buffered writes for
+  // both stdout and stderr to properly keep order of writes
   private readonly writes: WriteBuffer[] = [];
-  readonly streams: {
-    stdout: NodeJS.WritableStream;
-    stderr: NodeJS.WritableStream;
-  };
 
   constructor(
     rl: Interface,
     stdout: NodeJS.WritableStream,
     stderr: NodeJS.WritableStream
   ) {
-    this.streams = {
-      stdout: this.create(rl, stdout),
-      stderr: this.create(rl, stderr)
-    };
+    this.stdout = wrap(stdout, rl, this.writes);
+    this.stderr = wrap(stderr, rl, this.writes);
   }
 
   pause(options: PauseOptions = {}): void {
-    this.paused = options;
+    // only update when not yet paused
+    this.stdout.paused ??= options.stdout ?? true;
+    this.stderr.paused ??= options.stderr ?? true;
   }
 
   flush(): void {
-    this.paused = null;
+    this.stdout.paused = this.stderr.paused = null;
     // splice first before writing to remove all items in buffer array
     for (const write of this.writes.splice(0, this.writes.length)) {
       write.stream.write(write.chunk, write.encoding, write.callback);
     }
   }
+}
 
-  private create(rl: Interface, stream: NodeJS.WritableStream) {
-    const writable = new Writable();
-    writable._write = (chunk, encoding, callback) => {
-      // save to buffer when paused
-      if (this.paused) {
-        if (this.paused.buffer ?? true) {
-          this.writes.push({ stream, chunk, encoding, callback });
-        } else {
-          callback();
-        }
-        return;
-      }
-
-      let count = 0;
-      const total = rl.terminal ? 3 : 1;
-      // end callback to handle refresh line
-      const cb: typeof callback = error => {
-        refreshLine(rl);
-        // only fire callback at the end or if has error
-        if (++count >= total || error) {
-          callback(error);
-        }
-      };
-
-      if (rl.terminal) {
-        const chunks = getChunks(rl, stream);
-        stream.write(chunks.before, cb);
-        stream.write(chunk, encoding, cb);
-        stream.write(chunks.after, cb);
+function wrap(
+  stream: NodeJS.WritableStream,
+  rl: Interface,
+  writes: WriteBuffer[]
+) {
+  const transform = new Transform();
+  const result: WrappedStream = { stream: transform };
+  transform._transform = function (chunk, encoding, callback) {
+    // save to buffer when paused
+    if (result.paused) {
+      if (result.paused === true || (result.paused.buffer ?? true)) {
+        writes.push({ stream, chunk, encoding, callback });
       } else {
-        stream.write(chunk, encoding, cb);
+        callback();
       }
-    };
-    return writable;
-  }
+      return;
+    }
+    // save before and after chunks
+    const chunks = getChunks(rl, stream);
+    chunks && this.push(chunks.before);
+    this.push(chunk, encoding);
+    chunks && this.push(chunks.after);
+    // don't refresh the rl line here, let the consumer decide to do that instead
+    callback();
+  };
+  // make sure to pipe to write stream
+  transform.pipe(stream);
+  return result;
 }

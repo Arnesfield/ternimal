@@ -1,13 +1,27 @@
 import { Interface, ReadLineOptions } from 'readline';
 
-/** The pause options. */
-export interface PauseOptions {
+/** The write stream pause options. */
+export interface PauseStreamOptions {
   /**
    * Buffer chunks from write streams (stdout, stderr) when paused.
    * These chunks are flushed and written once resumed.
    * @default true
    */
   buffer?: boolean;
+}
+
+/** The pause options. */
+export interface PauseOptions {
+  /**
+   * Set boolean or options for pausing the `stdout` write stream.
+   * @default true
+   */
+  stdout?: boolean | PauseStreamOptions;
+  /**
+   * Set boolean or options for pausing the `stderr` write stream.
+   * @default true
+   */
+  stderr?: boolean | PauseStreamOptions;
 }
 
 /** The initialize options. */
@@ -37,6 +51,10 @@ export interface Terminal {
   readonly rl: Interface;
   /** The console instance. */
   readonly console: Console;
+  /** The `stdout` write stream of {@linkcode console}. */
+  readonly stdout: NodeJS.WritableStream;
+  /** The `stderr` write stream of {@linkcode console}. */
+  readonly stderr: NodeJS.WritableStream;
   /**
    * Check if the read stream is paused.
    * @returns `true` if paused.
@@ -48,7 +66,7 @@ export interface Terminal {
    * @param options The pause options.
    * @returns `this` for chaining.
    */
-  pause(options: PauseOptions): this;
+  pause(options?: PauseOptions): this;
   /**
    * Resume read (`stdin`) and write (`stdout`, `stderr`) streams
    * only when {@linkcode isPaused paused}.

@@ -15,20 +15,33 @@ export function init(options: T.Options = {}): T.Terminal {
 }
 
 class Terminal implements T.Terminal {
+  // TODO: handle pause
   #paused = false;
+  readonly #rl: Interface;
   readonly #output: OutputStream;
-  readonly rl: Interface;
   readonly console: Console;
 
   constructor(options: T.Options) {
     const input = options.stdin || process.stdin;
     const output = options.stdout || process.stdout;
     const stderr = options.stderr || process.stderr;
-    this.rl = createInterface({ ...options.readline, input, output })
+    this.#rl = createInterface({ ...options.readline, input, output })
       .on('pause', () => (this.#paused = true))
       .on('resume', () => (this.#paused = false));
-    this.#output = new OutputStream(this.rl, output, stderr);
-    this.console = new Console(this.#output.streams);
+    this.#output = new OutputStream(this.#rl, output, stderr);
+    this.console = new Console({ stdout: this.stdout, stderr: this.stderr });
+  }
+
+  get rl() {
+    return this.#rl;
+  }
+
+  get stdout() {
+    return this.#output.stdout.stream;
+  }
+
+  get stderr() {
+    return this.#output.stderr.stream;
   }
 
   isPaused() {
