@@ -34,14 +34,12 @@ class Terminal implements T.Terminal {
     this.console = new Console({ stdout: this.stdout, stderr: this.stderr });
   }
 
-  isPaused(stream: 'stdin' | 'stdout' | 'stderr') {
-    return stream === 'stdin'
-      ? this.stdin.isPaused()
-      : !!(
-          this.#paused &&
-          (stream === 'stdout' || stream === 'stderr') &&
-          (this.#paused[stream] ?? true)
-        );
+  paused() {
+    return {
+      stdin: this.stdin.isPaused(),
+      stdout: !!(this.#paused && (this.#paused.stdout ?? true)),
+      stderr: !!(this.#paused && (this.#paused.stderr ?? true))
+    };
   }
 
   pause(options: T.PauseOptions = {}) {
@@ -81,7 +79,7 @@ class Terminal implements T.Terminal {
   }
 
   refreshLine(): this {
-    if (!this.isPaused('stdout')) {
+    if (!this.paused().stdout) {
       refreshLine(this.rl);
     }
     return this;

@@ -29,6 +29,16 @@ export interface PauseOptions {
   stderr?: boolean | PauseStreamOptions;
 }
 
+/** The paused streams. */
+export interface Paused {
+  /** Determines if `stdin` read stream is paused. */
+  stdin: boolean;
+  /** Determines if `stdout` write stream is paused. */
+  stdout: boolean;
+  /** Determines if `stderr` write stream is paused. */
+  stderr: boolean;
+}
+
 /** The initialize options. */
 export interface Options {
   /** The options to create the `readline.Interface` instance. */
@@ -63,11 +73,10 @@ export interface Terminal {
   /** The `stderr` write stream of {@linkcode console}. */
   readonly stderr: NodeJS.WritableStream;
   /**
-   * Check if the stream is paused.
-   * @param stream The stream to check.
-   * @returns `true` if paused.
+   * Check if the streams are paused.
+   * @returns The paused streams.
    */
-  isPaused(stream: 'stdin' | 'stdout' | 'stderr'): boolean;
+  paused(): Paused;
   /**
    * Pause the read (`stdin`) and write (`stdout`, `stderr`) streams
    * only when not {@linkcode isPaused paused}.
