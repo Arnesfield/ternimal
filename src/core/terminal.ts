@@ -47,7 +47,9 @@ class Terminal implements T.Terminal {
   pause(options: T.PauseOptions = {}) {
     if (!this.#paused) {
       this.#paused = options;
-      this.rl.pause();
+      if (options.stdin ?? true) {
+        this.rl.pause();
+      }
       this.#output.pause(options);
     }
     return this;

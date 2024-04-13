@@ -13,6 +13,11 @@ export interface PauseStreamOptions {
 /** The pause options. */
 export interface PauseOptions {
   /**
+   * Pause `stdin` read stream.
+   * @default true
+   */
+  stdin?: boolean;
+  /**
    * Set boolean or options for pausing the `stdout` write stream.
    * @default true
    */
