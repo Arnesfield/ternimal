@@ -58,7 +58,7 @@ class Terminal<
 
   pause(options: T.PauseOptions = {}) {
     if (options.stdin ?? true) {
-      this.rl.pause();
+      this.raw.stdin.pause();
     }
     this.#output.pause(options);
     return this;
@@ -66,7 +66,7 @@ class Terminal<
 
   resume(options: T.ResumeOptions = {}) {
     if (options.stdin ?? true) {
-      this.rl.resume();
+      this.raw.stdin.resume();
     }
     this.#output.flush(options);
     return this;
