@@ -76,9 +76,7 @@ class Terminal<
   }
 
   refreshLine(): this {
-    if (!this.paused().stdout) {
-      refreshLine(this.rl, this.raw.stdout);
-    }
+    refreshLine(this.rl, this.raw.stdout);
     return this;
   }
 }
