@@ -5,6 +5,7 @@ import {
   PauseStreamOptions,
   ResumeOptions
 } from '../core/core.types.js';
+import { colorizeStream } from './colorize-stream.js';
 import { getChunks } from './get-chunks.js';
 import { refreshLine } from './refresh-line.js';
 
@@ -90,6 +91,8 @@ export class OutputStream {
       refreshLine(self.rl, stream);
       callback();
     };
+    // colorize transform stream if stream (stdout/stderr) does so
+    colorizeStream(transform, stream);
     // make sure to pipe to write stream
     transform.pipe(stream);
     return transform;
