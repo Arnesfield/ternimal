@@ -72,9 +72,14 @@ class Terminal<
     return this;
   }
 
-  setLine(line: string): this {
+  setPrompt(prompt: string): this {
+    this.rl.setPrompt(prompt);
+    return this.refreshLine();
+  }
+
+  setLine(line: string, refresh = true): this {
     (this.rl as Interface & { line: string }).line = line;
-    return this;
+    return refresh ? this.refreshLine() : this;
   }
 
   refreshLine(): this {
