@@ -17,12 +17,6 @@ interface WriteBuffer {
   callback(error: Error | null | undefined): void;
 }
 
-export interface WrappedStream {
-  // note that this stream is exposed to consumer
-  stream: NodeJS.WritableStream;
-  paused?: boolean | PauseStreamOptions | null;
-}
-
 /** Console output stream to write before the prompt line. */
 export class OutputStream {
   readonly stdout: NodeJS.WritableStream;
