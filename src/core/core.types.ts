@@ -3,7 +3,7 @@ import readline from 'readline';
 /** The write stream pause options. */
 export interface PauseStreamOptions {
   /**
-   * Buffer chunks from write streams (stdout, stderr) when paused.
+   * Buffer chunks from write streams (`stdout`, `stderr`) when paused.
    * These chunks are flushed and written once resumed.
    * @default true
    */
@@ -136,7 +136,7 @@ export interface Terminal<
    */
   setLine(line: string, refresh?: boolean): this;
   /**
-   * Refresh the {@linkcode rl} line.
+   * Refresh the {@linkcode rl} instance prompt line.
    * @returns `this` for chaining.
    */
   refreshLine(): this;
