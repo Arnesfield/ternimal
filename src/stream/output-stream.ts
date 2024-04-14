@@ -1,13 +1,11 @@
-import { Interface } from 'readline';
 import { Transform } from 'stream';
 import {
   PauseOptions,
   PauseStreamOptions,
   ResumeOptions
 } from '../core/core.types.js';
-import { refreshLine } from '../readline/refresh-line.js';
+import { Rl } from '../readline/readline.js';
 import { colorizeStream } from './colorize-stream.js';
-import { getChunks } from './get-chunks.js';
 
 interface WriteBuffer {
   name: 'stdout' | 'stderr';
@@ -30,7 +28,7 @@ export class OutputStream {
   private readonly writes: WriteBuffer[] = [];
 
   constructor(
-    private readonly rl: Interface,
+    private readonly rl: Rl,
     stdout: NodeJS.WritableStream,
     stderr: NodeJS.WritableStream | undefined
   ) {
@@ -77,12 +75,12 @@ export class OutputStream {
       }
       if (!paused) {
         // save before and after chunks
-        const chunks = getChunks(self.rl, stream);
+        const chunks = self.rl.chunks();
         chunks && this.push(chunks.before);
         this.push(chunk, encoding);
         chunks && this.push(chunks.after);
       }
-      refreshLine(self.rl, stream);
+      self.rl.refreshLine();
       callback();
     };
     // colorize transform stream if stream (stdout/stderr) does so

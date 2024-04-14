@@ -1,7 +1,7 @@
 import { Console } from 'console';
 import readline from 'readline';
 import * as T from '../core/core.types.js';
-import { refreshLine } from '../readline/refresh-line.js';
+import { Rl } from '../readline/readline.js';
 import { OutputStream } from '../stream/output-stream.js';
 
 /**
@@ -27,6 +27,7 @@ class Terminal<
   Stderr extends NodeJS.WritableStream | undefined
 > implements T.Terminal<Interface, Stdin, Stdout, Stderr>
 {
+  readonly #rl: Rl;
   readonly #output: OutputStream;
   readonly rl: Interface;
   readonly console: Console;
@@ -40,7 +41,8 @@ class Terminal<
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     this.raw = { stdin, stdout, stderr };
-    this.#output = new OutputStream((this.rl = rl), stdout, stderr);
+    this.#rl = new Rl((this.rl = rl), stdout);
+    this.#output = new OutputStream(this.#rl, stdout, stderr);
     this.stdout = this.#output.stdout;
     this.stderr = this.#output.stderr;
     this.console = new Console({ stdout: this.stdout, stderr: this.stderr });
@@ -76,7 +78,7 @@ class Terminal<
   }
 
   refreshLine(): this {
-    refreshLine(this.rl, this.raw.stdout);
+    this.#rl.refreshLine();
     return this;
   }
 }
