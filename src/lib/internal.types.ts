@@ -1,8 +1,7 @@
+import readline from 'readline';
+
 // NOTE: internal
 
-import { Interface } from 'readline';
-
-export interface RlInterface extends Interface {
-  line: string;
-  _refreshLine(): void;
-}
+export type Interface = (readline.Interface | readline.promises.Interface) & {
+  _refreshLine?(): void;
+};

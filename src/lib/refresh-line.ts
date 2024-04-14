@@ -1,5 +1,4 @@
-import { Interface } from 'readline';
-import { RlInterface } from './internal.types.js';
+import { Interface } from './internal.types.js';
 
 export function refreshLine(
   rl: Interface,
@@ -7,8 +6,8 @@ export function refreshLine(
 ): void {
   if (!rl.terminal) {
     // do nothing
-  } else if (typeof (rl as RlInterface)._refreshLine === 'function') {
-    (rl as RlInterface)._refreshLine();
+  } else if (typeof rl._refreshLine === 'function') {
+    rl._refreshLine();
   } else {
     // NOTE: emitting resize event triggers refresh
     // see https://github.com/nodejs/node lib/internal/readline/interface.js

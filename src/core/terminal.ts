@@ -1,7 +1,6 @@
 import { Console } from 'console';
 import readline from 'readline';
 import * as T from '../core/core.types.js';
-import { RlInterface } from '../lib/internal.types.js';
 import { OutputStream } from '../lib/output-stream.js';
 import { refreshLine } from '../lib/refresh-line.js';
 
@@ -72,7 +71,7 @@ class Terminal<
   }
 
   setLine(line: string): this {
-    (this.rl as RlInterface).line = line;
+    (this.rl as Interface & { line: string }).line = line;
     return this;
   }
 
