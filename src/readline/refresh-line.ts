@@ -1,4 +1,4 @@
-import { Interface } from './internal.types.js';
+import { Interface } from './readline.types.js';
 
 export function refreshLine(
   rl: Interface,

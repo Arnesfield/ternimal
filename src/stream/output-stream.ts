@@ -5,9 +5,9 @@ import {
   PauseStreamOptions,
   ResumeOptions
 } from '../core/core.types.js';
+import { refreshLine } from '../readline/refresh-line.js';
 import { colorizeStream } from './colorize-stream.js';
 import { getChunks } from './get-chunks.js';
-import { refreshLine } from './refresh-line.js';
 
 interface WriteBuffer {
   name: 'stdout' | 'stderr';

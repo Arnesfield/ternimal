@@ -1,8 +1,8 @@
 import { Console } from 'console';
 import readline from 'readline';
 import * as T from '../core/core.types.js';
-import { OutputStream } from '../lib/output-stream.js';
-import { refreshLine } from '../lib/refresh-line.js';
+import { refreshLine } from '../readline/refresh-line.js';
+import { OutputStream } from '../stream/output-stream.js';
 
 /**
  * Create the terminal instance.
