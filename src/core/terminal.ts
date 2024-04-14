@@ -71,20 +71,9 @@ class Terminal<
     return this;
   }
 
-  close() {
-    // include this redundant method just in case the
-    // close implementation changes in the future (e.g. cleanup)
-    this.rl.close();
-  }
-
-  setPrompt(prompt: string): this {
-    this.rl.setPrompt(prompt);
-    return this.refreshLine();
-  }
-
   setLine(line: string): this {
     (this.rl as RlInterface).line = line;
-    return this.refreshLine();
+    return this;
   }
 
   refreshLine(): this {

@@ -124,16 +124,8 @@ export interface Terminal<
    * @returns `this` for chaining.
    */
   resume(options?: ResumeOptions): this;
-  /** Close the {@linkcode rl} instance. */
-  close(): void;
   /**
-   * Set the prompt and call {@linkcode refreshLine}.
-   * @param prompt The prompt.
-   * @returns `this` for chaining.
-   */
-  setPrompt(prompt: string): this;
-  /**
-   * Set the line and call {@linkcode refreshLine}.
+   * Set the `rl.line`.
    * @param line The line.
    * @returns `this` for chaining.
    */
