@@ -1,7 +1,7 @@
 {
   "name": "ternimal",
   "version": "0.0.1-alpha.3",
-  "description": "Minimal readline interface wrapper that fixes the prompt below output logs.",
+  "description": "Minimal readline interface wrapper to output logs above the prompt line.",
   "keywords": [
     "terminal",
     "line",

@@ -9,7 +9,7 @@
 
 [![npm][npm-img]][npm-url]
 
-Minimal readline interface wrapper that fixes the prompt below output logs.
+Minimal readline interface wrapper to output logs above the prompt line.
 
 > This project was inspired by [serverline](https://www.npmjs.com/package/serverline).
 
