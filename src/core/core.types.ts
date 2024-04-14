@@ -60,7 +60,10 @@ export interface Paused {
 
 /** The initialize options. */
 export interface Options<
-  Interface extends readline.Interface | readline.promises.Interface
+  Interface extends readline.Interface | readline.promises.Interface,
+  Stdin extends NodeJS.ReadableStream,
+  Stdout extends NodeJS.WritableStream,
+  Stderr extends NodeJS.WritableStream | undefined
 > {
   /** The readline interface instance. */
   rl: Interface;
@@ -68,19 +71,22 @@ export interface Options<
    * The `stdin` read stream. Should match the
    * `input` from the {@linkcode rl} instance.
    */
-  stdin: NodeJS.ReadableStream;
+  stdin: Stdin;
   /**
    * The `stdout` write stream. Should match the
    * `output` from the {@linkcode rl} instance.
    */
-  stdout: NodeJS.WritableStream;
+  stdout: Stdout;
   /** The `stderr` write stream. */
-  stderr?: NodeJS.WritableStream;
+  stderr?: Stderr;
 }
 
 /** The terminal instance. */
 export interface Terminal<
-  Interface extends readline.Interface | readline.promises.Interface
+  Interface extends readline.Interface | readline.promises.Interface,
+  Stdin extends NodeJS.ReadableStream,
+  Stdout extends NodeJS.WritableStream,
+  Stderr extends NodeJS.WritableStream | undefined
 > {
   /** The readline interface instance. */
   readonly rl: Interface;
@@ -93,11 +99,11 @@ export interface Terminal<
   /** The read and write streams from provided options. */
   readonly raw: {
     /** The `stdin` read stream. */
-    readonly stdin: NodeJS.ReadableStream;
+    readonly stdin: Stdin;
     /** The `stdout` write stream. */
-    readonly stdout: NodeJS.WritableStream;
+    readonly stdout: Stdout;
     /** The `stderr` write stream. */
-    readonly stderr: NodeJS.WritableStream | undefined;
+    readonly stderr: Stderr;
   };
   /**
    * Check if the streams are paused.
