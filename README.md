@@ -42,9 +42,9 @@ const term = create({
 rl === term.rl; // true
 term.rl.prompt();
 term.rl.on('line', () => {
-  term.setPrompt('> ');
+  term.rl.prompt();
 });
-term.console.log('Hello World!');
+term.console.log('Hello %s!', 'World');
 ```
 
 ```text
