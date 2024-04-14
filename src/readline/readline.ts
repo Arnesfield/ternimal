@@ -18,7 +18,11 @@ export class Rl {
     const cols = (this.stream as NodeJS.WriteStream).columns;
     const lines =
       this.rl.terminal && typeof cols === 'number' && isFinite(cols) && cols > 0
-        ? Math.ceil(stringWidth(this.rl.getPrompt() + this.rl.line) / cols)
+        ? // include +1 for cases where the cursor is on
+          // the next line: the prompt line matches columns
+          Math.ceil(
+            (stringWidth(this.rl.getPrompt() + this.rl.line) + 1) / cols
+          )
         : 0;
     // make sure to only render these chunks when there is a line prompt
     return lines > 0
