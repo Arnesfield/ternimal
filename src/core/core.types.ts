@@ -13,7 +13,7 @@ export interface PauseStreamOptions {
 /** The pause options. */
 export interface PauseOptions {
   /**
-   * Pause `stdin` read stream.
+   * Pause the `stdin` read stream.
    * @default true
    */
   stdin?: boolean;
@@ -27,6 +27,25 @@ export interface PauseOptions {
    * @default true
    */
   stderr?: boolean | PauseStreamOptions;
+}
+
+/** The resume options. */
+export interface ResumeOptions {
+  /**
+   * Resume the `stdin` read stream.
+   * @default true
+   */
+  stdin?: boolean;
+  /**
+   * Resume the `stdout` write stream.
+   * @default true
+   */
+  stdout?: boolean;
+  /**
+   * Resume the `stderr` write stream.
+   * @default true
+   */
+  stderr?: boolean;
 }
 
 /** The paused streams. */
@@ -69,13 +88,8 @@ export interface Terminal<
   readonly console: Console;
   /** The `stdout` write stream of {@linkcode console}. */
   readonly stdout: NodeJS.WritableStream;
-  /**
-   * The `stderr` write stream of {@linkcode console}.
-   *
-   * If {@linkcode Options.stderr} was not provided,
-   * this is the same as {@linkcode stdout}.
-   */
-  readonly stderr: NodeJS.WritableStream;
+  /** The `stderr` write stream of {@linkcode console} if provided. */
+  readonly stderr: NodeJS.WritableStream | undefined;
   /** The read and write streams from provided options. */
   readonly raw: {
     /** The `stdin` read stream. */
@@ -100,9 +114,10 @@ export interface Terminal<
   /**
    * Resume read (`stdin`) and write (`stdout`, `stderr`) streams
    * only when {@linkcode isPaused paused}.
+   * @param options The resume options.
    * @returns `this` for chaining.
    */
-  resume(): this;
+  resume(options?: ResumeOptions): this;
   /** Close the {@linkcode rl} instance. */
   close(): void;
   /**

@@ -20,7 +20,6 @@ class Terminal<
   Interface extends readline.Interface | readline.promises.Interface
 > implements T.Terminal<Interface>
 {
-  #paused: T.PauseOptions | null | undefined;
   readonly #output: OutputStream;
   readonly rl: Interface;
   readonly console: Console;
@@ -32,36 +31,32 @@ class Terminal<
     const { rl, stdin, stdout, stderr } = options;
     this.raw = { stdin, stdout, stderr };
     this.#output = new OutputStream((this.rl = rl), stdout, stderr);
-    this.stdout = this.#output.stdout.stream;
-    this.stderr = this.#output.stderr?.stream || this.stdout;
+    this.stdout = this.#output.stdout;
+    this.stderr = this.#output.stderr;
     this.console = new Console({ stdout: this.stdout, stderr: this.stderr });
   }
 
   paused() {
     return {
       stdin: this.raw.stdin.isPaused(),
-      stdout: !!(this.#paused && (this.#paused.stdout ?? true)),
-      stderr: !!(this.#paused && (this.#paused.stderr ?? true))
+      stdout: !!this.#output.paused.stdout,
+      stderr: !!this.#output.paused.stderr
     };
   }
 
   pause(options: T.PauseOptions = {}) {
-    if (!this.#paused) {
-      this.#paused = options;
-      if (options.stdin ?? true) {
-        this.rl.pause();
-      }
-      this.#output.pause(options);
+    if (options.stdin ?? true) {
+      this.rl.pause();
     }
+    this.#output.pause(options);
     return this;
   }
 
-  resume() {
-    if (this.#paused) {
-      this.#paused = null;
+  resume(options: T.ResumeOptions = {}) {
+    if (options.stdin ?? true) {
       this.rl.resume();
-      this.#output.flush();
     }
+    this.#output.flush(options);
     return this;
   }
 
