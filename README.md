@@ -27,19 +27,17 @@ Import the module ([ESM only](https://gist.github.com/sindresorhus/a39789f98801d
 import readline from 'readline';
 import create from 'ternimal';
 
-const rl = readline.createInterface({
-  prompt: '> ',
-  input: process.stdin, // should match options.stdin
-  output: process.stdout // should match options.stdout
-});
-const term = create({
-  rl,
+const term = create(() => ({
   stdin: process.stdin,
   stdout: process.stdout,
-  stderr: process.stderr // optional
-});
+  stderr: process.stderr, // optional
+  rl: readline.createInterface({
+    prompt: '> ',
+    input: process.stdin, // should match options.stdin
+    output: process.stdout // should match options.stdout
+  })
+}));
 
-rl === term.rl; // true
 term.rl.prompt();
 term.rl.on('line', () => {
   term.rl.prompt(true);
@@ -54,7 +52,7 @@ Hello World!
 
 ## Options
 
-The `create(options)` function requires an options object.
+The `create(init)` function requires an init function that returns an options object.
 
 ### options.rl
 
@@ -82,11 +80,7 @@ The `stderr` write stream.
 
 ## Terminal
 
-The `create(options)` function returns a `Terminal` object.
-
-> [!TIP]
->
-> See [`src/core/core.types.ts`](src/core/core.types.ts) for more details about the types.
+The `create(init)` function returns a `Terminal` object.
 
 ### rl
 

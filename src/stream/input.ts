@@ -5,17 +5,21 @@ export type Interface = (readline.Interface | readline.promises.Interface) & {
   _refreshLine?(): void;
 };
 
-// control rl and stream
-export class Rl {
+// control rl and streams
+export class Input<
+  TInterface extends readline.Interface | readline.promises.Interface
+> {
   constructor(
-    private readonly rl: Interface,
-    private readonly stream: NodeJS.WritableStream
+    // allow replacing instances
+    public rl: TInterface & Interface,
+    public stdout: NodeJS.WritableStream,
+    public stderr: NodeJS.WritableStream | undefined
   ) {}
 
   // get chunks to write before and after the main chunk to write before the prompt line
   chunks(): { before: string; after: string } | null {
     // only allow when columns number is set (tty)
-    const cols = (this.stream as NodeJS.WriteStream).columns;
+    const cols = (this.stdout as NodeJS.WriteStream).columns;
     const lines =
       this.rl.terminal && typeof cols === 'number' && isFinite(cols) && cols > 0
         ? // include +1 for cases where the cursor is on
@@ -46,7 +50,7 @@ export class Rl {
       // see https://github.com/nodejs/node lib/internal/readline/interface.js
       // include data to differentiate
       // original resize (undefined) from workaround (refreshLine)
-      this.stream.emit('resize', { reason: 'refreshLine' });
+      this.stdout.emit('resize', { reason: 'refreshLine' });
     }
   }
 }
