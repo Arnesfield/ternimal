@@ -4,6 +4,8 @@
 > [!CAUTION]
 >
 > **_This is an alpha version of the package: currently untested and is considered unstable. Usage and API may change at any time. Use at your own risk._**
+>
+> **_Additionally, this README document is currently a work in progress and may not reflect the current API._**
 
 # ternimal
 
@@ -49,6 +51,10 @@ term.console.log('Hello %s!', 'World');
 Hello World!
 >
 ```
+
+> [!TIP]
+>
+> See [example](example) usage that leverages popular CLI tools like [inquirer](https://www.npmjs.com/package/inquirer) and [ora](https://www.npmjs.com/package/ora).
 
 ## Options
 
