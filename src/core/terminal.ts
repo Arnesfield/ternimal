@@ -1,7 +1,6 @@
 import { Console } from 'console';
 import readline from 'readline';
-import { Input } from '../stream/input.js';
-import { Output } from '../stream/output.js';
+import { IO } from '../stream/io.js';
 import { getStatus } from '../stream/status.js';
 import * as T from '../types/index.js';
 
@@ -28,8 +27,7 @@ class Terminal<
   Stderr extends NodeJS.WritableStream | undefined
 > implements T.Terminal<Interface, Stdin, Stdout, Stderr>
 {
-  readonly #input: Input<Interface>;
-  readonly #output: Output<Interface>;
+  readonly #io: IO<Interface>;
   #init: T.InitFunction<Interface, Stdin, Stdout, Stderr>;
   readonly #setup: T.SetupFunction<Interface, Stdin, Stdout, Stderr>[] = [];
   readonly #cleanup: (() => T.MaybePromise<void>)[] = [];
@@ -43,33 +41,32 @@ class Terminal<
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     this.raw = { stdin, stdout, stderr };
-    this.#input = new Input(rl, stdout, stderr);
-    this.#output = new Output(this.#input);
+    this.#io = new IO(rl, stdout, stderr);
     // references to stdout and stderr transform streams should not change!
     this.console = new Console({
-      stdout: this.#output.stdout,
-      stderr: this.#output.stderr
+      stdout: this.#io.tout,
+      stderr: this.#io.terr
     });
   }
 
   get rl() {
-    return this.#input.rl;
+    return this.#io.rl;
   }
 
   get stdout() {
-    return this.#output.stdout;
+    return this.#io.tout;
   }
 
   get stderr() {
     // output stderr is piped to stdout if no input stderr
-    return this.#input.stderr ? this.#output.stderr : undefined;
+    return this.#io.stderr ? this.#io.terr : undefined;
   }
 
   status() {
     return {
       stdin: getStatus(this.raw.stdin.isPaused()),
-      stdout: getStatus(this.#output.paused.stdout),
-      stderr: getStatus(this.#output.paused.stderr)
+      stdout: getStatus(this.#io.paused.stdout),
+      stderr: getStatus(this.#io.paused.stderr)
     };
   }
 
@@ -77,7 +74,7 @@ class Terminal<
     if (!options || options.stdin) {
       this.raw.stdin.pause();
     }
-    this.#output.pause(options);
+    this.#io.pause(options);
     return this;
   }
 
@@ -85,7 +82,7 @@ class Terminal<
     if (!options || options.stdin) {
       this.raw.stdin.resume();
     }
-    this.#output.flush(options);
+    this.#io.flush(options);
     return this;
   }
 
@@ -100,7 +97,7 @@ class Terminal<
   }
 
   refreshLine(): this {
-    this.#input.refreshLine();
+    this.#io.refreshLine();
     return this;
   }
 
@@ -136,14 +133,14 @@ class Terminal<
     type NotReadonly<T> = { -readonly [P in keyof T]: T[P] };
     type Raw = NotReadonly<typeof this.raw>;
     // set updated streams
-    this.#output.unpipe();
     // only update rl and streams to input after unpipe
-    this.#input.rl = rl;
+    this.#io.unpipe();
+    this.#io.rl = rl;
     (this.raw as Raw).stdin = stdin;
-    this.#input.stdout = (this.raw as Raw).stdout = stdout;
-    this.#input.stderr = (this.raw as Raw).stderr = stderr as Stderr;
-    // update output and console to use updated streams
-    this.#output.init();
+    this.#io.stdout = (this.raw as Raw).stdout = stdout;
+    this.#io.stderr = (this.raw as Raw).stderr = stderr as Stderr;
+    // pipe transform streams to updated streams
+    this.#io.pipe();
     // run setup functions
     for (const setup of this.#setup) {
       // NOTE: duplicate of use() for proper conditional await
