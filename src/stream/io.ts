@@ -48,13 +48,13 @@ export class IO<
     this.terr.unpipe(this.stderr || this.stdout);
   }
 
-  pause(options: PauseOptions | undefined): void {
+  pause(options: Omit<PauseOptions, 'stdin'> | undefined): void {
     // fallback to current value if not pausing
     this.paused.stdout = !options || options.stdout || this.paused.stdout;
     this.paused.stderr = !options || options.stderr || this.paused.stderr;
   }
 
-  flush(options: ResumeOptions | undefined): void {
+  flush(options: Omit<ResumeOptions, 'stdin'> | undefined): void {
     const out = !options || options.stdout;
     const err = !options || options.stderr;
     // skip if not resuming anything
@@ -63,11 +63,13 @@ export class IO<
     if (err) this.paused.stderr = false;
     // only flush and remove entries for the resumed streams
     // NOTE: taken from https://stackoverflow.com/a/15996017/7013346
-    for (let index = this.writes.length; index-- > 0; ) {
+    for (let index = 0; index < this.writes.length; ) {
       const w = this.writes[index];
       if ((out && w.name === 'stdout') || (err && w.name === 'stderr')) {
         this[w.name]?.write(w.chunk, w.encoding, w.callback);
         this.writes.splice(index, 1);
+      } else {
+        index++;
       }
     }
   }
