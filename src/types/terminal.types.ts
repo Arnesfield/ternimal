@@ -29,10 +29,23 @@ export interface Terminal<
     readonly stderr: Stderr;
   };
   /**
-   * Get the statuses of the streams (resumed, paused, muted).
-   * @returns The stream statuses.
+   * Calls `rl.prompt()` and sets the prompted state to active.
+   *
+   * It is recommended to use this instead of calling `rl.prompt()` directly
+   * to properly update and keep track of the prompted state.
+   *
+   * The prompted state is reset every time a `line` event
+   * is emitted by the {@linkcode rl} instance.
+   * @param preserveCursor Pass to `rl.prompt()`.
+   * @returns `this` for chaining.
    */
-  status(): Status;
+  prompt(preserveCursor?: boolean): this;
+  /**
+   * Set the prompt with `rl.setPrompt()` and call {@linkcode refreshLine}.
+   * @param prompt The prompt.
+   * @returns `this` for chaining.
+   */
+  setPrompt(prompt: string): this;
   /**
    * Pause the read (`stdin`) and write (`stdout`, `stderr`) streams.
    *
@@ -50,11 +63,10 @@ export interface Terminal<
    */
   resume(options?: ResumeOptions): this;
   /**
-   * Set the prompt with `rl.setPrompt()` and call {@linkcode refreshLine}.
-   * @param prompt The prompt.
-   * @returns `this` for chaining.
+   * Get the statuses of the streams (resumed, paused, muted).
+   * @returns The stream statuses.
    */
-  setPrompt(prompt: string): this;
+  status(): Status;
   /**
    * Set the `rl.line` and call {@linkcode refreshLine}.
    * @param line The line.
@@ -64,6 +76,9 @@ export interface Terminal<
   setLine(line: string, refresh?: boolean): this;
   /**
    * Refresh the {@linkcode rl} instance prompt line.
+   *
+   * This action is disabled if the prompt is not active.
+   * Call {@linkcode prompt} to update the prompted state.
    * @returns `this` for chaining.
    */
   refreshLine(): this;

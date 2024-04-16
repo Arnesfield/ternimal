@@ -62,12 +62,15 @@ class Terminal<
     return this.#io.stderr ? this.#io.terr : undefined;
   }
 
-  status() {
-    return {
-      stdin: getStatus(this.raw.stdin.isPaused()),
-      stdout: getStatus(this.#io.paused.stdout),
-      stderr: getStatus(this.#io.paused.stderr)
-    };
+  prompt(preserveCursor?: boolean) {
+    this.#io.prompted = true;
+    this.#io.rl.prompt(preserveCursor);
+    return this;
+  }
+
+  setPrompt(prompt: string): this {
+    this.rl.setPrompt(prompt);
+    return this.refreshLine();
   }
 
   pause(options?: T.PauseOptions) {
@@ -86,9 +89,12 @@ class Terminal<
     return this;
   }
 
-  setPrompt(prompt: string): this {
-    this.rl.setPrompt(prompt);
-    return this.refreshLine();
+  status() {
+    return {
+      stdin: getStatus(this.raw.stdin.isPaused()),
+      stdout: getStatus(this.#io.paused.stdout),
+      stderr: getStatus(this.#io.paused.stderr)
+    };
   }
 
   setLine(line: string, refresh = true): this {
@@ -122,6 +128,26 @@ class Terminal<
     return this.#use([setup], { reinit: false });
   }
 
+  // not async, return promise!
+  reinit(init?: T.InitFunction<Interface, Stdin, Stdout, Stderr>) {
+    this.#init = typeof init === 'function' ? init : this.#init;
+    const context: T.InitContext = { reinit: true };
+    const { rl, stdin, stdout, stderr } = this.#init(this, context);
+    type NotReadonly<T> = { -readonly [P in keyof T]: T[P] };
+    type Raw = NotReadonly<typeof this.raw>;
+    // set updated streams
+    // only update rl and streams to input after unpipe
+    this.#io.deinit();
+    this.#io.rl = rl;
+    (this.raw as Raw).stdin = stdin;
+    this.#io.stdout = (this.raw as Raw).stdout = stdout;
+    this.#io.stderr = (this.raw as Raw).stderr = stderr as Stderr;
+    // pipe transform streams to updated streams
+    this.#io.init();
+    // run setup functions
+    return this.#use(this.#setup, context);
+  }
+
   async cleanup(close = true) {
     // clear up cleanup array, then run cleanup and close rl
     for (const cleanup of this.#cleanup.splice(0, this.#cleanup.length)) {
@@ -132,27 +158,5 @@ class Terminal<
     if (close) {
       this.rl.close();
     }
-  }
-
-  // not async, return promise!
-  reinit(init?: T.InitFunction<Interface, Stdin, Stdout, Stderr>) {
-    if (typeof init === 'function') {
-      this.#init = init;
-    }
-    const context: T.InitContext = { reinit: true };
-    const { rl, stdin, stdout, stderr } = this.#init(this, context);
-    type NotReadonly<T> = { -readonly [P in keyof T]: T[P] };
-    type Raw = NotReadonly<typeof this.raw>;
-    // set updated streams
-    // only update rl and streams to input after unpipe
-    this.#io.unpipe();
-    this.#io.rl = rl;
-    (this.raw as Raw).stdin = stdin;
-    this.#io.stdout = (this.raw as Raw).stdout = stdout;
-    this.#io.stderr = (this.raw as Raw).stderr = stderr as Stderr;
-    // pipe transform streams to updated streams
-    this.#io.pipe();
-    // run setup functions
-    return this.#use(this.#setup, context);
   }
 }

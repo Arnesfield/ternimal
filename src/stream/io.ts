@@ -1,9 +1,9 @@
 import readline from 'readline';
 import { Transform } from 'stream';
-import stringWidth from 'string-width';
 import { PauseOptions } from '../types/pause.types.js';
-import { pipe } from './pipe.js';
 import { ResumeOptions } from '../types/resume.types.js';
+import { getLines } from './lines.js';
+import { pipe } from './pipe.js';
 
 interface WriteBuffer {
   name: 'stdout' | 'stderr';
@@ -20,6 +20,7 @@ export type Interface = (readline.Interface | readline.promises.Interface) & {
 export class IO<
   TInterface extends readline.Interface | readline.promises.Interface
 > {
+  prompted = false;
   readonly tout = this.transform('stdout');
   readonly terr = this.transform('stderr');
   readonly paused: Omit<PauseOptions, 'stdin'> = {};
@@ -33,19 +34,23 @@ export class IO<
     public stdout: NodeJS.WritableStream,
     public stderr: NodeJS.WritableStream | undefined
   ) {
-    this.pipe();
+    this.init();
   }
 
-  pipe(): void {
+  init(): void {
+    this.rl.on('line', () => (this.prompted = false));
+    // pipe transform streams to provided streams
     pipe(this.tout, this.stdout);
     pipe(this.terr, this.stderr || this.stdout);
   }
 
   // NOTE: make sure to call this before replacing the streams
-  unpipe(): void {
+  deinit(): void {
     // unpipe all may be destructive so unpipe destination streams only
     this.tout.unpipe(this.stdout);
     this.terr.unpipe(this.stderr || this.stdout);
+    // no need to remove rl line event listener
+    // since it is probably removed in rl.close()
   }
 
   pause(options: Omit<PauseOptions, 'stdin'> | undefined): void {
@@ -103,12 +108,12 @@ export class IO<
     // only allow when columns number is set (tty)
     const cols = (this.stdout as NodeJS.WriteStream).columns;
     const lines =
-      this.rl.terminal && typeof cols === 'number' && isFinite(cols) && cols > 0
-        ? // include +1 for cases where the cursor is on
-          // the next line: the prompt line matches columns
-          Math.ceil(
-            (stringWidth(this.rl.getPrompt() + this.rl.line) + 1) / cols
-          )
+      this.prompted &&
+      this.rl.terminal &&
+      typeof cols === 'number' &&
+      isFinite(cols) &&
+      cols > 0
+        ? getLines(this.rl.getPrompt() + this.rl.line, cols)
         : 0;
     // make sure to only render these chunks when there is a line prompt
     return lines > 0
@@ -123,7 +128,7 @@ export class IO<
   }
 
   refreshLine(): void {
-    if (!this.rl.terminal) {
+    if (!this.prompted || !this.rl.terminal) {
       // do nothing
     } else if (typeof this.rl._refreshLine === 'function') {
       this.rl._refreshLine();
