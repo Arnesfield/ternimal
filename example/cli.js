@@ -28,12 +28,25 @@ function getTime() {
 }
 
 // keep nth outside of .use() to persist between terminal close and reinit
-const getPrompt = (() => {
+const prompt = (() => {
   let nth = 0;
-  return (diff = 0) => {
-    nth += diff;
-    return `[${getTime()}] ${chalk.cyan(nth)}> `;
+  const prompt = {
+    type: 'short',
+    get(diff = 0) {
+      nth += diff;
+      const time = `[${getTime()}]`;
+      const input = `${chalk.cyan(nth)}> `;
+      return this.type === 'short'
+        ? `${time} ${input}`
+        : [
+            `\n${time}`,
+            chalk.green('user@host'),
+            chalk.yellow('directory'),
+            chalk.cyan('branch')
+          ].join(' ') + `\n${input}`;
+    }
   };
+  return prompt;
 })();
 
 // mock ping dirty example
@@ -75,9 +88,10 @@ function exit() {
 // lazy command map
 const command = {
   clear: 'clear',
+  toggle: 'toggle',
   ping: 'ping',
-  login: 'login',
   load: 'load',
+  login: 'login',
   help: 'help',
   exit: 'exit'
 };
@@ -102,6 +116,10 @@ term.use(() => {
           .join(', ')
       );
     }
+    // toggle prompt
+    else if (line === command.toggle) {
+      prompt.type = prompt.type === 'short' ? 'long' : 'short';
+    }
     // ping
     else if (line === command.ping) {
       ping();
@@ -122,7 +140,7 @@ term.use(() => {
           { name: 'username', message: 'Username:' },
           { name: 'password', type: 'password', message: 'Password:' }
         ]);
-        term.console.log('[%s] Login:', getTime(), answers);
+        term.console.log('Login:', answers);
       } catch (error) {
         term.console.error(error);
       } finally {
@@ -132,11 +150,11 @@ term.use(() => {
     }
     // basic logging
     else if (line.trim()) {
-      term.console.log('[%s] Line:', getTime(), line);
+      term.console.log('Line:', line);
     }
 
-    term.rl.setPrompt(getPrompt(1));
-    term.rl.prompt(true);
+    term.setPrompt(prompt.get(1));
+    term.prompt(true);
   });
 });
 
@@ -158,15 +176,15 @@ term.use(terminal => {
 term.use(() => {
   // example only, not accurate time interval
   const interval = setInterval(() => {
-    term.setPrompt(getPrompt());
+    term.setPrompt(prompt.get());
   }, 1000);
   // make sure to clear interval when closed
   return () => clearInterval(interval);
 });
 
 // use rl and console after .use() to make sure eveything is setup
-term.rl.setPrompt(getPrompt());
-term.rl.prompt();
+term.setPrompt(prompt.get());
+term.prompt();
 term.console.log(
   'Enter %s to show list of commands. Enter %s or %s to quit.',
   chalk.bold(command.help),
