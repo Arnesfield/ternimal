@@ -101,15 +101,25 @@ class Terminal<
     return this;
   }
 
-  async use(setup: T.SetupFunction<Interface, Stdin, Stdout, Stderr>) {
-    this.#setup.push(setup);
-    const result = setup(this, { reinit: false });
-    // conditional await so that it does not pause execution for sync
-    const cleanup =
-      !result || typeof result === 'function' ? result : await result;
-    if (typeof cleanup === 'function') {
-      this.#cleanup.push(cleanup);
+  async #use(
+    setups: T.SetupFunction<Interface, Stdin, Stdout, Stderr>[],
+    context: T.InitContext
+  ) {
+    for (const setup of setups) {
+      const result = setup(this, context);
+      // conditional await so that it does not pause execution for sync
+      const cleanup =
+        !result || typeof result === 'function' ? result : await result;
+      if (typeof cleanup === 'function') {
+        this.#cleanup.push(cleanup);
+      }
     }
+  }
+
+  // not async, return promise!
+  use(setup: T.SetupFunction<Interface, Stdin, Stdout, Stderr>) {
+    this.#setup.push(setup);
+    return this.#use([setup], { reinit: false });
   }
 
   async cleanup(close = true) {
@@ -124,7 +134,8 @@ class Terminal<
     }
   }
 
-  async reinit(init?: T.InitFunction<Interface, Stdin, Stdout, Stderr>) {
+  // not async, return promise!
+  reinit(init?: T.InitFunction<Interface, Stdin, Stdout, Stderr>) {
     if (typeof init === 'function') {
       this.#init = init;
     }
@@ -142,15 +153,6 @@ class Terminal<
     // pipe transform streams to updated streams
     this.#io.pipe();
     // run setup functions
-    for (const setup of this.#setup) {
-      // NOTE: duplicate of use() for proper conditional await
-      const result = setup(this, context);
-      // conditional await so that it does not pause execution for sync
-      const cleanup =
-        !result || typeof result === 'function' ? result : await result;
-      if (typeof cleanup === 'function') {
-        this.#cleanup.push(cleanup);
-      }
-    }
+    return this.#use(this.#setup, context);
   }
 }
