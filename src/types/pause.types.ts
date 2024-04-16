@@ -1,8 +1,9 @@
 /** The pause write stream options. */
 export interface PauseStreamOptions {
   /**
-   * Disable buffering chunks when write streams (`stdout`, `stderr`) are paused.
-   * Unless muted, these chunks are flushed and written once resumed.
+   * Chunks are buffered when the write streams (`stdout`, `stderr`)
+   * are paused and are then flushed and written once resumed.
+   * Set the mute option to drop these chunks instead.
    */
   mute?: boolean;
 }

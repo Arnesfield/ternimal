@@ -13,29 +13,35 @@ export interface Terminal<
 > {
   /** The readline interface instance. */
   readonly rl: Interface;
-  /** The console instance. */
+  /**
+   * The console instance.
+   *
+   * Logging through this console will write the output above the prompt line.
+   * The write streams ({@linkcode stdout}, {@linkcode stderr}) for this console
+   * can be {@link pause paused}, {@link resume resumed}, and {@link pause muted}.
+   */
   readonly console: Console;
   /** The `stdout` write stream of {@linkcode console}. */
   readonly stdout: NodeJS.WritableStream;
   /** The `stderr` write stream of {@linkcode console} if provided. */
   readonly stderr: NodeJS.WritableStream | undefined;
-  /** The read and write streams from provided options. */
+  /** The read and write streams from the provided options. */
   readonly raw: {
     /** The `stdin` read stream. */
     readonly stdin: Stdin;
     /** The `stdout` write stream. */
     readonly stdout: Stdout;
-    /** The `stderr` write stream. */
+    /** The `stderr` write stream if provided. */
     readonly stderr: Stderr;
   };
   /**
-   * Calls `rl.prompt()` and sets the prompted state to active.
+   * Call `rl.prompt()` and set the prompt state to active.
    *
-   * It is recommended to use this instead of calling `rl.prompt()` directly
-   * to properly update and keep track of the prompted state.
+   * It is recommended to use this instead of calling `rl.prompt()`
+   * directly to properly update and keep track of the prompt state.
    *
-   * The prompted state is reset every time a `line` event
-   * is emitted by the {@linkcode rl} instance.
+   * The prompt state is reset every time a `line` event is emitted
+   * by the {@linkcode rl} instance.
    * @param preserveCursor Pass to `rl.prompt()`.
    * @returns `this` for chaining.
    */
@@ -63,7 +69,7 @@ export interface Terminal<
    */
   resume(options?: ResumeOptions): this;
   /**
-   * Get the statuses of the streams (resumed, paused, muted).
+   * Get the statuses of the streams (paused, resumed, muted).
    * @returns The stream statuses.
    */
   status(): Status;
@@ -78,12 +84,13 @@ export interface Terminal<
    * Refresh the {@linkcode rl} instance prompt line.
    *
    * This action is disabled if the prompt is not active.
-   * Call {@linkcode prompt} to update the prompted state.
+   * Call {@linkcode prompt} to update the prompt state.
    * @returns `this` for chaining.
    */
   refreshLine(): this;
   /**
-   * Add a setup function that is rerun when the terminal is {@linkcode reinit reinitialized}.
+   * Add and run a setup function.
+   * This function is rerun when the terminal is {@link reinit reinitialized}.
    * @param setup The setup function.
    * @returns A promise to await this call if an async setup function were used.
    */
@@ -93,7 +100,8 @@ export interface Terminal<
   /**
    * Reinitialize the terminal and rerun all setup functions.
    *
-   * Make sure to run the {@linkcode close} method first before reinitializing.
+   * Make sure to run the {@linkcode cleanup} method first
+   * before reinitializing the terminal.
    * @param init Replace the existing `init` function.
    * @returns A promise to await this call if async setup functions were used.
    */

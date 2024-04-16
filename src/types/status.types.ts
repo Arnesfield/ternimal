@@ -1,9 +1,9 @@
-/** The statuses of the streams (resumed, paused, muted). */
+/** The statuses of the streams (paused, resumed, muted). */
 export interface Status {
   /** Status of the `stdin` read stream. */
-  stdin: 'resumed' | 'paused';
+  stdin: 'paused' | 'resumed';
   /** Status of the `stdout` write stream. */
-  stdout: 'resumed' | 'paused' | 'muted';
+  stdout: 'paused' | 'resumed' | 'muted';
   /** Status of the `stderr` write stream. */
-  stderr: 'resumed' | 'paused' | 'muted';
+  stderr: 'paused' | 'resumed' | 'muted';
 }

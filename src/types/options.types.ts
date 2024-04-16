@@ -7,7 +7,12 @@ export interface Options<
   Stdout extends NodeJS.WritableStream,
   Stderr extends NodeJS.WritableStream | undefined
 > {
-  /** The readline interface instance. */
+  /**
+   * The readline interface instance.
+   *
+   * The `input` and `output` streams for this instance should match
+   * the {@linkcode stdin} and {@linkcode stdout} options respectively.
+   */
   rl: Interface;
   /**
    * The `stdin` read stream.

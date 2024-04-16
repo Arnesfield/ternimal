@@ -109,7 +109,7 @@ class Terminal<
 
   async #use(
     setups: T.SetupFunction<Interface, Stdin, Stdout, Stderr>[],
-    context: T.InitContext
+    context: T.Context
   ) {
     for (const setup of setups) {
       const result = setup(this, context);
@@ -131,7 +131,7 @@ class Terminal<
   // not async, return promise!
   reinit(init?: T.InitFunction<Interface, Stdin, Stdout, Stderr>) {
     this.#init = typeof init === 'function' ? init : this.#init;
-    const context: T.InitContext = { reinit: true };
+    const context: T.Context = { reinit: true };
     const { rl, stdin, stdout, stderr } = this.#init(this, context);
     type NotReadonly<T> = { -readonly [P in keyof T]: T[P] };
     type Raw = NotReadonly<typeof this.raw>;

@@ -3,10 +3,10 @@ import { Options } from './options.types.js';
 import { Terminal } from './terminal.types.js';
 
 /** Type or promise type. */
-export type MaybePromise<T> = T | Promise<T>;
+export type MaybePromise<T> = T | Promise<T> | PromiseLike<T>;
 
-/** The initialize context. */
-export interface InitContext {
+/** The context object. */
+export interface Context {
   /** Determines if the terminal was reinitialized or not. */
   reinit: boolean;
 }
@@ -14,7 +14,7 @@ export interface InitContext {
 /**
  * The initialize function.
  * @param terminal The terminal instance. For the first initialization, this value is `null`.
- * @param context The initialize context.
+ * @param context The context object.
  * @returns The terminal options.
  */
 export type InitFunction<
@@ -24,13 +24,13 @@ export type InitFunction<
   Stderr extends NodeJS.WritableStream | undefined
 > = (
   terminal: Terminal<Interface, Stdin, Stdout, Stderr> | null,
-  context: InitContext
+  context: Context
 ) => Options<Interface, Stdin, Stdout, Stderr>;
 
 /**
  * Setup function for {@linkcode Terminal.use}.
  * @param terminal The terminal instance.
- * @param context The initialize context.
+ * @param context The context object.
  * @returns An optional cleanup function that is run for {@linkcode Terminal.cleanup}.
  */
 export type SetupFunction<
@@ -40,5 +40,5 @@ export type SetupFunction<
   Stderr extends NodeJS.WritableStream | undefined
 > = (
   terminal: Terminal<Interface, Stdin, Stdout, Stderr>,
-  context: InitContext
+  context: Context
 ) => MaybePromise<void | (() => MaybePromise<void>)>;
