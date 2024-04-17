@@ -1,6 +1,6 @@
 [npm-img]: https://img.shields.io/npm/v/ternimal.svg
 [npm-url]: https://www.npmjs.com/package/ternimal
-[preview]: https://gist.githubusercontent.com/Arnesfield/a952aead855ff6ec9b18b7fb4e794256/raw/b98ea2bfd74cd9e84b6abd9252b3311611f88f18/preview.gif
+[preview]: https://gist.githubusercontent.com/Arnesfield/a952aead855ff6ec9b18b7fb4e794256/raw/45956fe3624549f455e7f088cd53fc5219867bb3/preview.gif
 
 > [!CAUTION]
 >
