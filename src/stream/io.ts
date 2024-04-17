@@ -113,7 +113,10 @@ export class IO<
       typeof cols === 'number' &&
       isFinite(cols) &&
       cols > 0
-        ? getLines(this.rl.getPrompt() + this.rl.line, cols)
+        ? // add a space at the end for +1 last line width
+          // for cases where the cursor is on the next line
+          // when the prompt line matches columns
+          getLines(this.rl.getPrompt() + this.rl.line + ' ', cols)
         : 0;
     // make sure to only render these chunks when there is a line prompt
     return lines > 0
