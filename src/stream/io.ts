@@ -130,8 +130,8 @@ export class IO<
       : null;
   }
 
-  refreshLine(): void {
-    if (!this.prompted || !this.rl.terminal) {
+  refreshLine(force?: boolean): void {
+    if (!this.rl.terminal || !(force || this.prompted)) {
       // do nothing
     } else if (typeof this.rl._refreshLine === 'function') {
       this.rl._refreshLine();

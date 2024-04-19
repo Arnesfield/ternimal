@@ -95,11 +95,12 @@ export interface Terminal<
   /**
    * Refresh the {@linkcode rl} instance prompt line.
    *
-   * This action is disabled if the prompt is not active.
-   * Call {@linkcode prompt} to update the prompt state.
+   * This is disabled if `rl.terminal` is `false` or if the prompt is not active.
+   * Update the prompt state with {@linkcode prompt} or {@linkcode active}.
+   * @param force Set to `true` to ignore the prompt state.
    * @returns `this` for chaining.
    */
-  refreshLine(): this;
+  refreshLine(force?: boolean): this;
   /**
    * Add and run a setup function.
    * This function is rerun when the terminal is {@link reinit reinitialized}.

@@ -106,8 +106,8 @@ class Terminal<
     return refresh ? this.refreshLine() : this;
   }
 
-  refreshLine(): this {
-    this.#io.refreshLine();
+  refreshLine(force?: boolean): this {
+    this.#io.refreshLine(force);
     return this;
   }
 
