@@ -152,7 +152,7 @@ class Terminal<
     return this.#use(this.#setup, context);
   }
 
-  async cleanup(close = true) {
+  async deinit(close = true) {
     // clear up cleanup array, then run cleanup and close rl
     for (const cleanup of this.#cleanup.splice(0, this.#cleanup.length)) {
       const result = cleanup();

@@ -31,7 +31,7 @@ export type InitFunction<
  * Setup function for {@linkcode Terminal.use}.
  * @param terminal The terminal instance.
  * @param context The context object.
- * @returns An optional cleanup function that is run for {@linkcode Terminal.cleanup}.
+ * @returns An optional cleanup function that is run for {@linkcode Terminal.deinit}.
  */
 export type SetupFunction<
   Interface extends readline.Interface | readline.promises.Interface,

@@ -113,7 +113,7 @@ export interface Terminal<
   /**
    * Reinitialize the terminal and rerun all setup functions.
    *
-   * Make sure to run the {@linkcode cleanup} method first
+   * Make sure to run the {@linkcode deinit} method first
    * before reinitializing the terminal.
    * @param init Replace the existing `init` function.
    * @returns A promise to await this call if async setup functions were used.
@@ -127,5 +127,5 @@ export interface Terminal<
    * @param [close=true] Set to `false` to skip calling `rl.close()`.
    * @returns A promise to await this call if async cleanup functions were used.
    */
-  cleanup(close?: boolean): MaybePromise<void>;
+  deinit(close?: boolean): MaybePromise<void>;
 }
