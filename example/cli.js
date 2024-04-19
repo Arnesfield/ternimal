@@ -82,13 +82,14 @@ async function load() {
 // hide prompt and close terminal for graceful exit
 function exit() {
   clearInterval(pingInterval);
-  term.setPrompt('').cleanup();
+  term.setPrompt('').deinit();
 }
 
 // lazy command map
 const command = {
   clear: 'clear',
   toggle: 'toggle',
+  question: 'question',
   ping: 'ping',
   load: 'load',
   login: 'login',
@@ -120,6 +121,26 @@ term.use(() => {
     else if (line === command.toggle) {
       prompt.type = prompt.type === 'short' ? 'long' : 'short';
     }
+    // question using default readline
+    else if (line === command.question) {
+      // the prompt state is already inactive here because we're in a line event
+      // but when outside a line event make sure to set the prompt state to inactive
+      // term.active(false);
+      // pause only write streams
+      term.pause({ stdout: true, stderr: true });
+      // show questions in callback hell fashion (consider readline.promises.Interface)
+      term.rl.question('1. Question using readline: ', line => {
+        // use console directly since term.console is paused
+        console.log('Answer:', line);
+        term.rl.question('2. Another question using readline: ', line => {
+          console.log('Answer:', line);
+          // once all are answered, show prompt to set active state
+          term.resume().prompt(true);
+        });
+      });
+      // return to skip prompt
+      return;
+    }
     // ping
     else if (line === command.ping) {
       ping();
@@ -127,14 +148,14 @@ term.use(() => {
     // ora spinner
     else if (line === command.load) {
       // allow mocked ping logging while spinner loads
-      term.cleanup();
+      term.deinit();
       await load();
       term.reinit();
     }
     // inquirer login
     else if (line === command.login) {
       // pause write streams to pause mocked ping then close the terminal
-      term.pause().cleanup();
+      term.pause().deinit();
       try {
         const answers = await inquirer.prompt([
           { name: 'username', message: 'Username:' },
@@ -176,7 +197,10 @@ term.use(terminal => {
 term.use(() => {
   // example only, not accurate time interval
   const interval = setInterval(() => {
-    term.setPrompt(prompt.get());
+    // only update prompt when active
+    if (term.status.active()) {
+      term.setPrompt(prompt.get());
+    }
   }, 1000);
   // make sure to clear interval when closed
   return () => clearInterval(interval);
@@ -217,5 +241,5 @@ function ad() {
 }
 
 // somehow handling sigint changes inquirer behavior
-process.on('SIGINT', () => {});
+process.on('SIGINT', () => process.exit());
 process.on('exit', ad);
