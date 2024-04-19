@@ -35,7 +35,19 @@ export interface Terminal<
     readonly stderr: Stderr;
   };
   /**
-   * Call `rl.prompt()` and set the prompt state to active.
+   * Set the prompt state manually. The prompt state is set to active
+   * when calling {@linkcode prompt} and is set to inactive when a
+   * `line` event is emitted by the {@linkcode rl} instance.
+   *
+   * When the prompt state is active:
+   * - Output logs from {@linkcode console} are displayed above the prompt line.
+   * - {@linkcode refreshLine} is enabled.
+   * @param [active=true] The prompt state.
+   * @returns `this` for chaining.
+   */
+  active(active?: boolean): this;
+  /**
+   * Call `rl.prompt()` and set the prompt state to {@link active}.
    *
    * It is recommended to use this instead of calling `rl.prompt()`
    * directly to properly update and keep track of the prompt state.

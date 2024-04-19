@@ -62,10 +62,14 @@ class Terminal<
     return this.#io.stderr ? this.#io.terr : undefined;
   }
 
-  prompt(preserveCursor?: boolean) {
-    this.#io.prompted = true;
-    this.#io.rl.prompt(preserveCursor);
+  active(active = true) {
+    this.#io.prompted = active;
     return this;
+  }
+
+  prompt(preserveCursor?: boolean) {
+    this.#io.rl.prompt(preserveCursor);
+    return this.active();
   }
 
   setPrompt(prompt: string): this {
