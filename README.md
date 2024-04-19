@@ -1,6 +1,6 @@
 [npm-img]: https://img.shields.io/npm/v/ternimal.svg
 [npm-url]: https://www.npmjs.com/package/ternimal
-[preview]: https://gist.githubusercontent.com/Arnesfield/a952aead855ff6ec9b18b7fb4e794256/raw/45956fe3624549f455e7f088cd53fc5219867bb3/preview.gif
+[preview]: https://gist.githubusercontent.com/Arnesfield/a952aead855ff6ec9b18b7fb4e794256/raw/3564db0cf6084dfcc579b2de6bdd2ed7f4817eca/preview.gif
 
 > [!CAUTION]
 >
@@ -133,11 +133,35 @@ The read and write streams from the provided options.
 - `raw.stdout` - The `stdout` write stream.
 - `raw.stderr` - The `stderr` write stream if provided.
 
+### status
+
+Type: `object`
+
+Get the prompt state and the statuses of the streams.
+
+```javascript
+terminal.status.active(); // boolean
+terminal.status.stdin(); // 'paused' | 'resumed'
+terminal.status.stdout(); // 'paused' | 'resumed' | 'muted'
+terminal.status.stderr(); // 'paused' | 'resumed' | 'muted'
+```
+
+### active(active?)
+
+Type: `(active?: boolean) => this`
+
+Set the prompt state manually (default `active` value: `true`). The prompt state is set to active when calling [`prompt`](#prompt) and is set to inactive when a `line` event is emitted by the [`rl`](#rl) instance.
+
+When the prompt state is active:
+
+- Output logs from [`console`](#console) are displayed above the prompt line.
+- [`refreshLine`](#refreshlineforce) is enabled.
+
 ### prompt()
 
 Type: `(preserveCursor?: boolean) => this`
 
-Call `rl.prompt()` and set the prompt state to active.
+Call `rl.prompt()` and set the prompt state to [active](#activeactive).
 
 It is recommended to use this instead of calling `rl.prompt()` directly to properly update and keep track of the prompt state.
 
@@ -147,7 +171,7 @@ The prompt state is reset every time a `line` event is emitted by the [`rl`](#rl
 
 Type: `(prompt: string) => this`
 
-Set the prompt with `rl.setPrompt()` and call [`refreshLine`](#refreshline).
+Set the prompt with `rl.setPrompt()` and call [`refreshLine`](#refreshlineforce).
 
 ### pause(options?)
 
@@ -189,31 +213,23 @@ terminal.resume({ stdout: true });
 
 Note that this resumes the raw stdin directly via [`raw.stdin.resume()`](#raw) instead of `rl.resume()`.
 
-### status()
-
-Type: `() => Status`
-
-Get the statuses of the streams (paused, resumed, muted).
-
-```javascript
-{ stdin: 'paused', stdout: 'resumed', stderr: 'muted' }
-```
-
 ### setLine(line, refresh?)
 
 Type: `(line: string, refresh?: boolean) => this`
 
-Set the `rl.line` and call [`refreshLine`](#refreshline).
+Set the `rl.line` and call [`refreshLine`](#refreshlineforce).
 
-Set the `refresh` option to call [`refreshLine`](#refreshline) after setting the line (default: `true`).
+Set the `refresh` option to call [`refreshLine`](#refreshlineforce) after setting the line (default: `true`).
 
-### refreshLine()
+### refreshLine(force?)
 
-Type: `() => this`
+Type: `(force?: boolean) => this`
 
 Refresh the [`rl`](#rl) instance prompt line.
 
-This action is disabled if the prompt is not active. Call [`prompt`](#prompt) to update the prompt state.
+This is disabled if `rl.terminal` is `false` or if the prompt is not active. Update the prompt state with [`prompt`](#prompt) or [`active`](#activeactive).
+
+Set `force` option to `true` to ignore the prompt state.
 
 ### use(setup)
 
@@ -221,7 +237,7 @@ Type: `(setup: SetupFunction) => MaybePromise<void>`
 
 Add and run a setup function. This function is rerun when the terminal is [reinitialized](#reinitinit).
 
-The setup function can return an optional cleanup function that is run for [`cleanup`](#cleanupclose).
+The setup function can return an optional cleanup function that is run for [`deinit`](#deinitclose).
 
 ### reinit(init?)
 
@@ -229,9 +245,9 @@ Type: `(init?: InitFunction) => MaybePromise<void>`
 
 Reinitialize the terminal and rerun all setup functions.
 
-Make sure to run the [`cleanup`](#cleanupclose) method first before reinitializing the terminal.
+Make sure to run the [`deinit`](#deinitclose) method first before reinitializing the terminal.
 
-### cleanup(close?)
+### deinit(close?)
 
 Type: `(close?: boolean) => MaybePromise<void>`
 
