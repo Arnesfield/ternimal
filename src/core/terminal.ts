@@ -62,6 +62,13 @@ class Terminal<
     return this.#io.stderr ? this.#io.terr : undefined;
   }
 
+  readonly status = {
+    active: () => this.#io.prompted,
+    stdin: () => getStatus(this.raw.stdin.isPaused()),
+    stdout: () => getStatus(this.#io.paused.stdout),
+    stderr: () => getStatus(this.#io.paused.stderr)
+  };
+
   active(active = true) {
     this.#io.prompted = active;
     return this;
@@ -91,14 +98,6 @@ class Terminal<
     }
     this.#io.flush(options);
     return this;
-  }
-
-  status() {
-    return {
-      stdin: getStatus(this.raw.stdin.isPaused()),
-      stdout: getStatus(this.#io.paused.stdout),
-      stderr: getStatus(this.#io.paused.stderr)
-    };
   }
 
   setLine(line: string, refresh = true): this {

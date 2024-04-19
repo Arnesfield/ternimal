@@ -1,9 +1,17 @@
 import { PauseOptions } from '../types/pause.types.js';
-import { Status } from '../types/status.types.js';
+import { Terminal } from '../types/terminal.types.js';
 
-export function getStatus(value: PauseOptions['stdin']): Status['stdin'];
-export function getStatus(value: PauseOptions['stdout']): Status['stdout'];
-export function getStatus(value: PauseOptions['stdout']): Status['stdout'] {
+type Status = Terminal<any, any, any, any>['status'];
+
+export function getStatus(
+  value: PauseOptions['stdin']
+): ReturnType<Status['stdin']>;
+export function getStatus(
+  value: PauseOptions['stdout']
+): ReturnType<Status['stdout']>;
+export function getStatus(
+  value: PauseOptions['stdout']
+): ReturnType<Status['stdout']> {
   // handle possible null value
   return typeof value === 'object' && value?.mute
     ? 'muted'

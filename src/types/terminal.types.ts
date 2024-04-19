@@ -2,7 +2,6 @@ import readline from 'readline';
 import { InitFunction, MaybePromise, SetupFunction } from './init.types.js';
 import { PauseOptions } from './pause.types.js';
 import { ResumeOptions } from './resume.types.js';
-import { Status } from './status.types.js';
 
 /** The terminal instance. */
 export interface Terminal<
@@ -33,6 +32,17 @@ export interface Terminal<
     readonly stdout: Stdout;
     /** The `stderr` write stream if provided. */
     readonly stderr: Stderr;
+  };
+  /** Get the prompt state and the statuses of the streams. */
+  readonly status: {
+    /** @returns The prompt state. */
+    active(): boolean;
+    /** @return The status of the `stdin` read stream. */
+    stdin(): 'paused' | 'resumed';
+    /** @returns The status of the `stdout` write stream. */
+    stdout(): 'paused' | 'resumed' | 'muted';
+    /** @returns The status of the `stderr` write stream. */
+    stderr(): 'paused' | 'resumed' | 'muted';
   };
   /**
    * Set the prompt state manually. The prompt state is set to active
@@ -80,11 +90,6 @@ export interface Terminal<
    * @returns `this` for chaining.
    */
   resume(options?: ResumeOptions): this;
-  /**
-   * Get the statuses of the streams (paused, resumed, muted).
-   * @returns The stream statuses.
-   */
-  status(): Status;
   /**
    * Set the `rl.line` and call {@linkcode refreshLine}.
    * @param line The line.
